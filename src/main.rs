@@ -210,7 +210,7 @@ fn main() {
     let matches = App::new("atlast")
         .version("1.0")
         .author("Devin Vander Stelt")
-        .about("Create texture atlasi that last")
+        .about("Create texture atlases that last")
         .arg(Arg::with_name("asset-directory")
              .short("d")
              .value_name("DIR_NAME")
