@@ -3,7 +3,6 @@ use clap::{App, Arg};
 use std::path::Path;
 use std::fs::File;
 use std::io::BufWriter;
-use std::fs::FileType;
 use std::io::Write;
 use std::io::Cursor;
 
@@ -25,17 +24,25 @@ struct Rect {
 
 impl Rect {
     fn contains(&self, other: &Rect) -> bool {
-        self.contains_point(other.x, other.y) ||
-        self.contains_point(other.x+other.width, other.y) ||
-        self.contains_point(other.x, other.y+other.height) ||
-        self.contains_point(other.x+other.width, other.y+other.height)
-    }
+        let left = self.x;
+        let right = self.x + self.width;
+        let top = self.y;
+        let bottom = self.y + self.height;
 
-    fn contains_point(&self, x: u32, y: u32) -> bool {
-        self.x <= x &&
-        self.y <= y &&
-        self.x + self.width >= x &&
-        self.y + self.height >= y
+        let o_left = other.x;
+        let o_right = other.x + other.width;
+        let o_top = other.y;
+        let o_bottom = other.y + other.height;
+
+        if right <= o_left || o_right <= left {
+            return false;
+        }
+
+        if top >= o_bottom || o_top >= bottom {
+            return false;
+        }
+
+        return true;
     }
 }
 
@@ -115,7 +122,7 @@ impl Atlas {
             height
         };
 
-        while self.records.iter().any(|rect| rect.contains(&pos)) || pos.x+pos.height > self.width {
+        while self.records.iter().any(|rect| rect.contains(&pos)) || pos.x+pos.width > self.width {
             if pos.x == self.width-1 {
                 pos.x = 0;
                 pos.y += 1;
@@ -248,6 +255,8 @@ fn main() {
 
     println!("Packing...");
     atlas.pack();
+
+    println!("{:?}", atlas.records);
 
     println!("Writing...");
     atlas.write(output_file);
