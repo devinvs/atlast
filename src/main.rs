@@ -48,11 +48,18 @@ impl Rect {
 
 #[derive(Serialize, Debug)]
 struct AtlasRecord {
-    x: f32,
-    y: f32,
-    width: f32,
-    height: f32,
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
     name: String
+}
+
+#[derive(Serialize, Debug)]
+struct AtlasData {
+    records: Vec<AtlasRecord>,
+    width: u32,
+    height: u32
 }
 
 
@@ -197,17 +204,22 @@ impl Atlas {
         let atlas_records: Vec<AtlasRecord> = self.records.iter().zip(self.images.iter())
             .map(|(rect, image)| {
                 AtlasRecord {
-                    x: rect.x as f32 / width as f32,
-                    y: rect.y as f32 / height as f32,
-                    width: rect.width as f32 / width as f32,
-                    height: rect.height as f32 / height as f32,
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height,
                     name: image.name.clone()
                 }
             })
             .collect();
 
-        zip.write_all(&serialize(&atlas_records).unwrap()).unwrap();
+        let data = AtlasData {
+            records: atlas_records,
+            width,
+            height
+        };
 
+        zip.write_all(&serialize(&data).unwrap()).unwrap();
         zip.finish().unwrap();
     }
 }
@@ -255,8 +267,6 @@ fn main() {
 
     println!("Packing...");
     atlas.pack();
-
-    println!("{:?}", atlas.records);
 
     println!("Writing...");
     atlas.write(output_file);
