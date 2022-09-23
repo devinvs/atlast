@@ -34,11 +34,11 @@ impl Rect {
         let o_top = other.y;
         let o_bottom = other.y + other.height;
 
-        if right <= o_left || o_right <= left {
+        if right < o_left || o_right < left {
             return false;
         }
 
-        if top >= o_bottom || o_top >= bottom {
+        if top > o_bottom || o_top > bottom {
             return false;
         }
 
